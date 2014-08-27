@@ -34,7 +34,6 @@ public class EsFeeder extends Configured implements Tool  {
 				if ((args.length > i+1) && (!args[i+1].startsWith("-"))){
 					i++;
 					this.servers = args[i];
-					System.out.println("SERVERS: "+this.servers);
 				} else {
 					log.error("server option requires at least one server");
 					log.error("Usage: [--servers|-s [server:port]+] [--index index] --input|-i input_path");
@@ -45,7 +44,6 @@ public class EsFeeder extends Configured implements Tool  {
 				if ((args.length > i+1) && (!args[i+1].startsWith("-"))){
 					i++;
 					this.index = args[i];
-					System.out.println("INDICE: "+this.index);
 				} else {
 					log.error("index option requires at least index");
 					log.error("Usage: [--servers|-s [server:port]+] [--index index] --input|-i input_path");
@@ -56,7 +54,6 @@ public class EsFeeder extends Configured implements Tool  {
 				if ((args.length > i+1) && (!args[i+1].startsWith("-"))){
 					i++;
 					this.input = args[i]; 
-					System.out.println("INPUT: "+this.input);
 				} else {
 					log.error("input option requires a path");
 					log.error("Usage: [--servers|-s [server:port]+] [--index index] --input|-i input_path");
@@ -94,7 +91,6 @@ public class EsFeeder extends Configured implements Tool  {
 		job.setMapOutputValueClass(MapWritable.class);
 		
 		job.setNumReduceTasks(0);
-        	System.out.println("TEST: " + this.input);	
 		FileInputFormat.addInputPath(job, new Path(this.input));
 		
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
