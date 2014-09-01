@@ -15,11 +15,12 @@ import org.elasticsearch.hadoop.mr.EsOutputFormat;
 
 public class EsFeeder extends Configured implements Tool  {
 	
-	
+	final String HELP_TXT="Usage: [--servers|-s [server:port]+] --prefix PREFIX [--index index] --input|-i input_path";
 	private static Logger log = Logger.getLogger(EsFeeder.class);
 	private String servers = "localhost:9200";
 	private String index = "default";
 	private String input;
+	private String prefix = "dc";
 	
 	public static void main(String[] args) throws Exception {
 		int res = ToolRunner.run(new Configuration(), new EsFeeder(), args);
@@ -36,7 +37,7 @@ public class EsFeeder extends Configured implements Tool  {
 					this.servers = args[i];
 				} else {
 					log.error("server option requires at least one server");
-					log.error("Usage: [--servers|-s [server:port]+] [--index index] --input|-i input_path");
+					log.error(HELP_TXT);
 					System.exit(-1);
 				}
 				break;
@@ -46,7 +47,7 @@ public class EsFeeder extends Configured implements Tool  {
 					this.index = args[i];
 				} else {
 					log.error("index option requires at least index");
-					log.error("Usage: [--servers|-s [server:port]+] [--index index] --input|-i input_path");
+					log.error(HELP_TXT);
 					System.exit(-1);
 				}				
 				break;
@@ -56,10 +57,20 @@ public class EsFeeder extends Configured implements Tool  {
 					this.input = args[i]; 
 				} else {
 					log.error("input option requires a path");
-					log.error("Usage: [--servers|-s [server:port]+] [--index index] --input|-i input_path");
+					log.error(HELP_TXT);
 					System.exit(-1);
 				}
-				break;				
+				break;
+			case "--prefix":
+				if ((args.length > i+1) && (!args[i+1].startsWith("-"))){
+					i++;
+					this.prefix = args[i]; 
+				} else {
+					log.error("prefix option requires an string");
+					log.error(HELP_TXT);
+					System.exit(-1);
+				}
+				break;
 			default:
 				log.error("Unrecognized option: " + args[i] ) ;
 				break;
@@ -68,8 +79,12 @@ public class EsFeeder extends Configured implements Tool  {
 		}
 		if ( this.input == null || this.input.isEmpty() ){
 			log.error("input option is required");
-			log.error("Usage: [--servers|-s [server:port]+] [--index index] --input|-i input_path");
+			log.error(HELP_TXT);
 			System.exit(-1);
+		}
+		if ( this.prefix == null || this.prefix.isEmpty()){
+			log.error("prefix option is required");
+			log.error(HELP_TXT);
 		}
 	}
 	
@@ -79,7 +94,9 @@ public class EsFeeder extends Configured implements Tool  {
 		optParser(args);
 				
 		conf.set("es.nodes", this.servers);
-		conf.set("es.resource", this.index + "/{hcan_SiteName}");
+		conf.set("prefix",this.prefix);
+		conf.set("es.resource", this.index + "/{"+this.prefix+"SiteName}");
+		conf.set("es.mapping.id",this.prefix+"Id");
 		
 		Job job = Job.getInstance(conf,"Description");
 		job.setJarByClass(EsFeeder.class);
